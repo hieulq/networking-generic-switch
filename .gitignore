@@ -1,6 +1,6 @@
 # Compiled files
 *.py[co]
-
+.idea/
 # Sphinx
 _build
 doc/source/api/

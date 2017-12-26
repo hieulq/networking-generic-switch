@@ -56,6 +56,15 @@ class TestNetmikoCiscoIos(test_netmiko_base.NetmikoSwitchTestBase):
             ['interface 3333', 'no switchport access vlan 33',
              'no switchport mode trunk', 'switchport trunk allowed vlan none'])
 
+    @mock.patch('networking_generic_switch.devices.netmiko_devices.'
+                'NetmikoSwitch._get_connection')
+    def test_save_config(self, mock_get):
+        mock_net = mock.MagicMock()
+        mock_get.return_value = mock_net
+        cmd_set = ['fake', 'command']
+        self.switch.send_commands_to_device(cmd_set)
+        mock_net.send_command.assert_called_once_with('fake command')
+
     def test__format_commands(self):
         cmd_set = self.switch._format_commands(
             cisco.CiscoIos.ADD_NETWORK,

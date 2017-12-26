@@ -72,7 +72,7 @@ class NetmikoSwitch(devices.GenericSwitchDevice):
                 'host', '') or self.config.get('ip', ''),
             'timeout': CONF.ngs_coordination.acquire_timeout}
 
-    def _format_commands(self, commands, **kwargs):
+    def _format_commands(self, commands, single=False, **kwargs):
         if not commands:
             return []
         if not all(kwargs.values()):
@@ -83,7 +83,10 @@ class NetmikoSwitch(devices.GenericSwitchDevice):
         except (KeyError, TypeError):
             raise exc.GenericSwitchNetmikoMethodError(cmds=commands,
                                                       args=kwargs)
-        return cmd_set
+        if single:
+            return cmd_set[0]
+        else:
+            return cmd_set
 
     @contextlib.contextmanager
     def _get_connection(self):
@@ -142,7 +145,9 @@ class NetmikoSwitch(devices.GenericSwitchDevice):
                     # NOTE (vsaienko) always save configuration
                     # when configuration is applied successfully.
                     if self.SAVE_CONFIGURATION:
-                        net_connect.send_command(self.SAVE_CONFIGURATION)
+                        net_connect.send_command(
+                            self._format_commands(self.SAVE_CONFIGURATION,
+                                                  single=True))
         except Exception as e:
             raise exc.GenericSwitchNetmikoConnectError(
                 config=device_utils.sanitise_config(self.config), error=e)
